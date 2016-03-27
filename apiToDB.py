@@ -9,7 +9,7 @@ convenios = []
 contConvenios = 0
 
 databaseName = 'dadosSiconv'
-collectionName = 'convenios'
+collectionName = 'conveniosTeste'
 mongoPort = 27017
 
 client = MongoClient('localhost', mongoPort)
@@ -25,7 +25,9 @@ convenios = dadosConvenios['convenios']
 while offset < totalConvenios:
     offset += 500
     contConvenios += 500
-    request = requests.get(dadosConvenios['metadados']['proximos'])
+    request = requests.get("http://api.convenios.gov.br/siconv/v1/consulta/convenios.json?offset=%d" % offset)
+    if request is None:
+        break
     dadosConvenios = request.json()
     convenios += dadosConvenios['convenios']
     if contConvenios == 10000:  #limitações do mongo
@@ -33,7 +35,7 @@ while offset < totalConvenios:
         del convenios[:]
         contConvenios = 0
         print("Dados inseridos")
-    print(offset)
+    print("%d de %d" % (offset, totalConvenios))
 
 queryResult = collection.insert_many(convenios)
 print("Total de registros: ")
